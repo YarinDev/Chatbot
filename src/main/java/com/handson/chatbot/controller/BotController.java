@@ -7,6 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+
 @Service
 @RestController
 @RequestMapping("/bot")
@@ -16,8 +18,7 @@ public class BotController {
     AmazonService amazonService;
 
     @RequestMapping(value = "/amazon", method = RequestMethod.GET)
-    public ResponseEntity<?> getProduct(@RequestParam String keyword)
-    {
+    public ResponseEntity<?> getProduct(@RequestParam String keyword) throws IOException {
         return new ResponseEntity<>(amazonService.searchProducts(keyword), HttpStatus.OK);
     }
 }

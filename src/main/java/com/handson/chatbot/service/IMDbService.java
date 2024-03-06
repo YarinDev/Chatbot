@@ -6,9 +6,13 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+
 
 @Service
-public class AmazonService {
+public class IMDbService {
     // This PRODUCT_PATTERN is used compile the regex pattern to get the movie name and rating
     public static final Pattern MOVIE250_PATTERN = Pattern.compile("tabindex=\"0\"><h3 class=\"ipc-title__text\">(\\d+\\.[^<]+)<\\/h3>.*?aria-label=\"IMDb rating: (\\d+\\.\\d+)\"");
 
@@ -63,6 +67,30 @@ public class AmazonService {
     public String searchMovie(String keyword) throws IOException {
         return parseMovieHtml(getMovieSearchHtml(keyword));
     }
+    public String searchMovieJson(String keyword) throws IOException {
+        String html = getMovieSearchHtml(keyword);
+        return parseMovieJson(html);
+    }
+    // Function to parse HTML and return movie details in JSON format
+    private String parseMovieJson(String html) {
+        StringBuilder responseBuilder = new StringBuilder();
+
+        Matcher matcher = MOVIE_SEARCH_PATTERN.matcher(html);
+
+        while (matcher.find()) {
+            responseBuilder.append("Movie Name: ").append(matcher.group(1)).append("\n");
+            responseBuilder.append("Year: ").append(matcher.group(2)).append("\n");
+
+            String[] topCredits = matcher.group(3).split(",");
+            responseBuilder.append("Top Credits:\n");
+            for (String credit : topCredits) {
+                responseBuilder.append("- ").append(credit.trim()).append("\n");
+            }
+            responseBuilder.append("\n");
+        }
+
+        return responseBuilder.toString();
+    }
 
     // This parseProductHtml method is used to parse the HTML of the movie page using regex to get the movie name and rating
     private String parseMovieHtml(String html) {
@@ -74,6 +102,7 @@ public class AmazonService {
         }
         return res;
     }
+
 
     // This getTopMoviesHtml method is used to get the HTML of the top 250 movies page from imdb
     private String getMovieSearchHtml(String keyword) throws IOException {
